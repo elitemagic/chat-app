@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,24 +9,68 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-
 import {
   collection,
-  getDocs,
   addDoc,
   onSnapshot,
   query,
   where,
 } from "firebase/firestore";
 
-const ShoppingLists = ({ db, route }) => {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const ShoppingLists = ({ db, route, isConnected }) => {
   const { userID } = route.params;
 
-  // declare a new state variable
   const [lists, setLists] = useState([]);
   const [listName, setListName] = useState("");
   const [item1, setItem1] = useState("");
   const [item2, setItem2] = useState("");
+
+  let unsubShoppinglists;
+
+  useEffect(() => {
+    if (isConnected === true) {
+      // unregister current onSnapshot() listener to avoid registering multiple listeners when
+      // useEffect code is re-executed.
+      if (unsubShoppinglists) unsubShoppinglists();
+      unsubShoppinglists = null;
+
+      const q = query(
+        collection(db, "shoppinglists"),
+        where("uid", "==", userID)
+      );
+      unsubShoppinglists = onSnapshot(q, (documentsSnapshot) => {
+        let newLists = [];
+        documentsSnapshot.forEach((doc) => {
+          newLists.push({ id: doc.id, ...doc.data() });
+        });
+        cacheShoppingLists(newLists);
+        setLists(newLists);
+      });
+    } else loadCachedLists();
+
+    // Clean up code
+    return () => {
+      if (unsubShoppinglists) unsubShoppinglists();
+    };
+  }, [isConnected]);
+
+  const loadCachedLists = async () => {
+    const cachedLists = (await AsyncStorage.getItem("shopping_lists")) || [];
+    setLists(JSON.parse(cachedLists));
+  };
+
+  const cacheShoppingLists = async (listsToCache) => {
+    try {
+      await AsyncStorage.setItem(
+        "shopping_lists",
+        JSON.stringify(listsToCache)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   const addShoppingList = async (newList) => {
     const newListRef = await addDoc(collection(db, "shoppinglists"), newList);
@@ -38,99 +82,59 @@ const ShoppingLists = ({ db, route }) => {
     }
   };
 
-  useEffect(() => {
-    const q = query(
-      collection(db, "shoppinglists"),
-      where("uid", "==", userID)
-    );
-    const unsubShoppinglists = onSnapshot(q, (documentsSnapshot) => {
-      let newLists = [];
-      documentsSnapshot.forEach((doc) => {
-        newLists.push({ id: doc.id, ...doc.data() });
-      });
-      setLists(newLists);
-    });
-
-    return () => {
-      if (unsubShoppinglists) unsubShoppinglists();
-    };
-  }, []);
-
-  // const fetchShoppingLists = async () => {
-  //   {
-  //     /* get documents of the collection, the first argument (db) is the database object passed from app.js and the second is the collection name youre pointing to */
-  //   }
-  //   const listsDocuments = await getDocs(collection(db, "shoppinglists"));
-  //   {
-  //     /* create empty array */
-  //   }
-  //   let newLists = [];
-  //   listsDocuments.forEach((docObject) => {
-  //     {
-  //       /* .push function adds an object to the array */
-  //     }
-  //     newLists.push({ id: docObject.id, ...docObject.data() });
-  //     // newLists.push({
-  //     //   id: docObject.id,
-  //     //   name: docObject.data().name,
-  //     //   items: docObject.data().items,
-  //     // });
-  //   });
-  //   setLists(newLists);
-  // };
-
-  // useEffect(() => {
-  //   fetchShoppingLists();
-  // }, [`${lists}`]);
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    else return null;
+  };
 
   return (
     <View style={styles.container}>
-      {/* Use React native component 'FlatList' to render data from list state. It requires 2 props - data and renderItem*/}
       <FlatList
         style={styles.listsContainer}
         data={lists}
         renderItem={({ item }) => (
           <View style={styles.listItem}>
             <Text>
-              {/* The array function join() converts an array into a string*/}
               {item.name}: {item.items.join(", ")}
             </Text>
           </View>
         )}
       />
-      <View style={styles.listForm}>
-        <TextInput
-          style={styles.listName}
-          placeholder="List Name"
-          value={listName}
-          onChangeText={setListName}
-        />
-        <TextInput
-          style={styles.item}
-          placeholder="Item #1"
-          value={item1}
-          onChangeText={setItem1}
-        />
-        <TextInput
-          style={styles.item}
-          placeholder="Item #2"
-          value={item2}
-          onChangeText={setItem2}
-        />
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            const newList = {
-              uid: userID,
-              name: listName,
-              items: [item1, item2],
-            };
-            addShoppingList(newList);
-          }}
-        >
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
-      </View>
+      {isConnected === true ? (
+        <View style={styles.listForm}>
+          <TextInput
+            style={styles.listName}
+            placeholder="List Name"
+            value={listName}
+            onChangeText={setListName}
+          />
+          <TextInput
+            style={styles.item}
+            placeholder="Item #1"
+            value={item1}
+            onChangeText={setItem1}
+          />
+          <TextInput
+            style={styles.item}
+            placeholder="Item #2"
+            value={item2}
+            onChangeText={setItem2}
+          />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              const newList = {
+                uid: userID,
+                name: listName,
+                items: [item1, item2],
+              };
+              addShoppingList(newList);
+            }}
+          >
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       {Platform.OS === "ios" ? (
         <KeyboardAvoidingView behavior="padding" />
@@ -187,6 +191,18 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontWeight: "600",
     fontSize: 20,
+  },
+  logoutButton: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    backgroundColor: "#C00",
+    padding: 10,
+    zIndex: 1,
+  },
+  logoutButtonText: {
+    color: "#FFF",
+    fontSize: 10,
   },
 });
 
