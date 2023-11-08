@@ -1,32 +1,27 @@
-import { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-
-import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { useState, useEffect } from "react";
+import { StyleSheet, View, Platform, KeyboardAvoidingView } from "react-native";
+import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import {
   collection,
-  getDocs,
   addDoc,
   onSnapshot,
   query,
   orderBy,
 } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MapView from "react-native-maps";
 
-const Chat = ({ route, navigation, db, isConnected }) => {
+import CustomActions from "./CustomActions";
+
+const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const { userID, name, backgroundChat } = route.params;
 
   /* initailze state */
   const [messages, setMessages] = useState([]);
 
   let unsubMessages; // Variable to handle Firestore listener unsubscribe.
+
+  renderActions = { renderCustomActions };
 
   const renderInputToolbar = (props) => {
     if (isConnected) return <InputToolbar {...props} />;
@@ -35,11 +30,9 @@ const Chat = ({ route, navigation, db, isConnected }) => {
 
   useEffect(() => {
     if (isConnected === true) {
-      // unregister current onSnapshot() listener to avoid registering multiple listeners when
-      // useEffect code is re-executed.
+      // unregister current onSnapshot() listener to avoid registering multiple listeners when useEffect code is re-executed.
       if (unsubMessages) unsubMessages();
       unsubMessages = null;
-
       navigation.setOptions({ title: name });
 
       const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
@@ -100,6 +93,28 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     );
   };
 
+  const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} {...props} />;
+  };
+
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 130, borderRadius: 13, margin: 10 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: backgroundChat }]}>
       <GiftedChat
@@ -107,9 +122,11 @@ const Chat = ({ route, navigation, db, isConnected }) => {
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
         onSend={(messages) => onSend(messages)}
+        renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
         user={{
           _id: userID,
-          name: name,
+          name,
         }}
       />
       {Platform.OS === "ios" ? (
@@ -125,6 +142,18 @@ const Chat = ({ route, navigation, db, isConnected }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  logoutButton: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    backgroundColor: "#C00",
+    padding: 10,
+    zIndex: 1,
+  },
+  logoutButtonText: {
+    color: "#FFF",
+    fontSize: 10,
   },
 });
 

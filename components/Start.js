@@ -1,27 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import {
   StyleSheet,
   View,
   Text,
-  Button,
   TextInput,
   ImageBackground,
   TouchableOpacity,
   Image,
   Alert,
-  LogBox,
 } from "react-native";
 
 import { getAuth, signInAnonymously } from "firebase/auth";
 
-LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
-LogBox.ignoreLogs(["Console Warning"]);
-
 // The app’s main Chat component that renders the chat UI
 const Start = ({ navigation }) => {
   const auth = getAuth();
-  const [backgroundStart, setBackgroundStart] = useState("");
+  const [backgroundStart, setBackgroundStart] = useState("background1");
   const [backgroundChat, setBackgroundChat] = useState("");
 
   const [name, setName] = useState("");
@@ -33,7 +28,9 @@ const Start = ({ navigation }) => {
 
         navigation.navigate("Chat", {
           userID: uid,
+          // userID is a unique identifier for each user
           name: name,
+          // name is the name of the user
           backgroundChat: backgroundChat,
         });
         Alert.alert("Signed in Successfully!");
