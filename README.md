@@ -1,10 +1,10 @@
-# chat_app
+# chat-app
 
-ChatApp, built with React Native, enables real-time messaging, image and video sharing, and location sharing on mobile devices.
+chat-app, built with React Native, enables real-time messaging, image and video sharing, and location sharing on mobile devices.
 
 
 # Features
-This React Native mobile chat app, called ChatApp, offers the following features:
+This React Native mobile chat-app, offers the following features:
 
 - User customization: Choose a username and chat screen background color.
 - Conversations: Chat interface displaying messages, input field, and submit button.
@@ -12,7 +12,6 @@ This React Native mobile chat app, called ChatApp, offers the following features
 - Data storage: Utilizes Google Firebase for online and offline message storage.
 - Personalization: Select from four background color options.
 - Real-time chat with anonymous sign-in, offline message viewing, and multimedia sharing.
-
 
 
 ## Technology Utilized
@@ -23,6 +22,7 @@ AsyncStorage (Caching for offline viewing)
 React Native Gifted Chat Library
 Firebase Cloud Storage (for images)
 Expo ImagePicker and Media Library
+
 
 ## Setting up the Environment
 
@@ -42,7 +42,6 @@ Create and sign-up for a database on https://firebase.google.com/
 Install firebase in your project directory: npm install firebase
 Import personal firebase config from project settings tab in firebase console into App.js
 Within firebase database rules adjust "allow read, wreite: if false;" to "allow read, write: if true;", then publish
-
 
 
 ### Packages to install
