@@ -107,9 +107,9 @@ const CustomActions = ({
     <TouchableOpacity
       style={styles.container}
       accessible={true}
-      accessibilityLabel="Loads 4 options for the user to choose from"
+      accessibilityLabel="Loads 4 possible actions the user can choose for the user to choose from"
       accessibilityRole="button"
-      accessibilityHint="Loads 4 options for the user to choose from"
+      accessibilityHint="A button that opens 4 options for the user to choose from"
       onPress={onActionPress}
     >
       <View style={[styles.wrapper, wrapperStyle]}>

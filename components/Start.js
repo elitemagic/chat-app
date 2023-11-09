@@ -66,45 +66,36 @@ const Start = ({ navigation }) => {
             accessibilityHint="Enter your name here"
             accessibilityRole="text"
           />
-
           <Text>Set your favorite background image</Text>
           <View style={styles.backgroundStartSelect}>
-            <TouchableOpacity
-              accessible={true}
-              accessibilityLabel="Options for background selection, this is the first"
-              accessibilityRole="button"
-              accessibilityHint="Let's you choose a background for your start screen"
-              onPress={() => setBackgroundStart("background1")}
-            >
-              <Image
-                source={require("../assets/background1.png")}
-                style={styles.backgroundStart_icons}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              accessible={true}
-              accessibilityLabel="Options for background selection, this is the second"
-              accessibilityRole="button"
-              accessibilityHint="Let's you choose a background for your start screen"
-              onPress={() => setBackgroundStart("background2")}
-            >
-              <Image
-                source={require("../assets/background2.png")}
-                style={styles.backgroundStart_icons}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              accessible={true}
-              accessibilityLabel="Options for background selection, this is the third and final option"
-              accessibilityRole="button"
-              accessibilityHint="Let's you choose a background for your start screen"
-              onPress={() => setBackgroundStart("background3")}
-            >
-              <Image
-                source={require("../assets/background3.png")}
-                style={styles.backgroundStart_icons}
-              />
-            </TouchableOpacity>
+            {[
+              {
+                image: require("../assets/background1.png"),
+                id: "background1",
+              },
+              {
+                image: require("../assets/background2.png"),
+                id: "background2",
+              },
+              {
+                image: require("../assets/background3.png"),
+                id: "background3",
+              },
+            ].map((background, index) => (
+              <TouchableOpacity
+                accessible={true}
+                accessibilityLabel="Options for background selection"
+                accessibilityRole="button"
+                accessibilityHint="Let's you choose a background for your start screen"
+                key={index}
+                onPress={() => setBackgroundStart(background.id)}
+              >
+                <Image
+                  source={background.image}
+                  style={styles.backgroundStart_icons}
+                />
+              </TouchableOpacity>
+            ))}
           </View>
 
           <Text>Set background color for your chat screen</Text>
