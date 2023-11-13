@@ -44,17 +44,14 @@ const CustomActions = ({
   };
 
   const pickImage = async () => {
+    //request permission to access media library
     let permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissions?.granted) {
+      //launches image library
       let result = await ImagePicker.launchImageLibraryAsync();
-      if (!result.cancelled) {
-        // Convert the content URI to a file URI creating a unique reference string for the picked image
-        const fileUri = await ContentUri.getFilePath(result.uri);
-        await uploadAndSendImage(fileUri);
-      } else {
-        Alert.alert("Permissions haven't been granted.");
-      }
-    }
+      //update the state if user doenst cancel picking the image
+      if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
+    } else Alert.alert("Permissions haven't been granted.");
   };
 
   const takePhoto = async () => {
