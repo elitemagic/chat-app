@@ -3,7 +3,6 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { ContentUri } from "expo-file-system";
 
 const CustomActions = ({
   wrapperStyle,
@@ -49,7 +48,7 @@ const CustomActions = ({
     if (permissions?.granted) {
       //launches image library
       let result = await ImagePicker.launchImageLibraryAsync();
-      //update the state if user doenst cancel picking the image
+      //update the state if user doens`t cancel picking the image
       if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
     } else Alert.alert("Permissions haven't been granted.");
   };

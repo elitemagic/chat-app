@@ -17,7 +17,7 @@
     "@react-navigation/native-stack": "^6.9.16",
     "dayjs": "^1.11.10",
     "expo": "~49.0.15",
-    "expo-constants": "^14.4.2",
+    "expo-constants": "~14.4.2",
     "expo-document-picker": "~11.5.4",
     "expo-file-system": "~15.4.4",
     "expo-image-picker": "~14.3.2",
